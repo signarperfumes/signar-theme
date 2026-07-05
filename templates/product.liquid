@@ -1,0 +1,312 @@
+<div class="product-page-container">
+  <div class="product-page-content">
+    <div class="product-page-gallery" id="productGallery">
+      {% if product.featured_image %}
+        <img src="{{ product.featured_image | image_url: width: 1200 }}" alt="{{ product.title }}" id="galleryImg">
+      {% endif %}
+      <div class="magnifier-lens" id="magnifierLens"></div>
+      <div class="zoom-hint">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="m21 21-4.35-4.35"/>
+          <path d="M11 8v6M8 11h6"/>
+        </svg>
+        Hover to zoom · Click to fullscreen
+      </div>
+    </div>
+    <div class="product-page-details">
+      <div class="product-page-breadcrumb">
+        <a href="{{ routes.root_url }}">Home</a> / <a href="{{ routes.all_products_collection_url }}">Shop</a> / {{ product.title }}
+      </div>
+      <h1 class="product-page-title">{{ product.title }}</h1>
+      <p class="product-page-category">
+        {% for collection in product.collections limit:1 %}
+          {{ collection.title }} · 
+        {% endfor %}
+        Eau de Parfum
+      </p>
+      
+      {% if product.metafields.custom.rating %}
+        <div class="product-page-rating">
+          <div class="stars">
+            {% assign rating = product.metafields.custom.rating.value %}
+            {% for i in (1..5) %}
+              {% if i <= rating %}
+                <svg width="16" height="16" viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+              {% else %}
+                <svg width="16" height="16" viewBox="0 0 24 24" style="fill:#ddd;"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <span class="rating-text">{{ product.metafields.custom.rating.value }} · {{ product.metafields.custom.review_count.value }} reviews</span>
+        </div>
+      {% endif %}
+
+      <div class="product-page-price">{{ product.price | money }}</div>
+      <p class="product-page-desc">{{ product.description }}</p>
+
+      {% if product.metafields.custom.top_notes %}
+        <div class="product-page-notes">
+          <h4>Fragrance Notes</h4>
+          <div style="margin-bottom:1rem;">
+            <strong style="font-size:0.75rem; letter-spacing:0.1em; text-transform:uppercase; color:#888;">Top Notes</strong>
+            <div class="notes-list" style="margin-top:0.5rem;">
+              {% for note in product.metafields.custom.top_notes.value %}
+                <span class="note-tag">{{ note }}</span>
+              {% endfor %}
+            </div>
+          </div>
+          {% if product.metafields.custom.heart_notes %}
+            <div style="margin-bottom:1rem;">
+              <strong style="font-size:0.75rem; letter-spacing:0.1em; text-transform:uppercase; color:#888;">Heart Notes</strong>
+              <div class="notes-list" style="margin-top:0.5rem;">
+                {% for note in product.metafields.custom.heart_notes.value %}
+                  <span class="note-tag">{{ note }}</span>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+          {% if product.metafields.custom.base_notes %}
+            <div>
+              <strong style="font-size:0.75rem; letter-spacing:0.1em; text-transform:uppercase; color:#888;">Base Notes</strong>
+              <div class="notes-list" style="margin-top:0.5rem;">
+                {% for note in product.metafields.custom.base_notes.value %}
+                  <span class="note-tag">{{ note }}</span>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {% form 'product', product %}
+        {% unless product.has_only_default_variant %}
+          {% for option in product.options_with_values %}
+            <div class="product-page-size">
+              <h4>{{ option.name }}</h4>
+              <div class="size-options">
+                {% for value in option.values %}
+                  <button type="button" class="size-option {% if option.selected_value == value %}active{% endif %}" 
+                          data-option-position="{{ option.position }}" 
+                          data-value="{{ value | escape }}">
+                    {{ value }}
+                  </button>
+                {% endfor %}
+              </div>
+            </div>
+          {% endfor %}
+        {% endunless %}
+
+        <select name="id" id="ProductSelect" style="display:none;">
+          {% for variant in product.variants %}
+            <option value="{{ variant.id }}" {% if variant == product.selected_or_first_available_variant %}selected{% endif %}>
+              {{ variant.title }} - {{ variant.price | money }}
+            </option>
+          {% endfor %}
+        </select>
+
+        <div class="product-page-qty">
+          <h4>Quantity</h4>
+          <div class="qty-selector">
+            <button type="button" id="ppQtyMinus">−</button>
+            <span id="ppQtyValue">1</span>
+            <button type="button" id="ppQtyPlus">+</button>
+          </div>
+          <input type="number" name="quantity" value="1" min="1" id="ProductQuantity" style="display:none;">
+        </div>
+
+        <div class="product-page-actions">
+          {% if product.available %}
+            <button type="submit" name="add" class="product-page-add-btn" id="ppAddBtn" {% unless product.selected_or_first_available_variant.available %}disabled{% endunless %}>
+              Add to Bag — {{ product.price | money }}
+            </button>
+          {% else %}
+            <button type="button" class="product-page-add-btn" disabled style="opacity:0.5; cursor:not-allowed;">
+              Sold Out
+            </button>
+          {% endif %}
+          <button type="button" class="product-page-wishlist-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            Add to Wishlist
+          </button>
+        </div>
+      {% endform %}
+
+      <div class="product-page-meta">
+        <p><strong>SKU:</strong> {{ product.selected_or_first_available_variant.sku }}</p>
+        <p><strong>Category:</strong> {% for collection in product.collections limit:1 %}{{ collection.title }}{% endfor %}</p>
+        <p><strong>Availability:</strong> {% if product.available %}In Stock{% else %}Out of Stock{% endif %}</p>
+        <p><strong>Free Shipping:</strong> On orders above PKR 5,000</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- YOU MAY ALSO LIKE -->
+  <div class="also-like-section">
+    <div class="section-header">
+      <p class="section-subtitle">Complete Your Collection</p>
+      <h2 class="section-title">You May Also Like</h2>
+    </div>
+    <div class="also-like-grid">
+      {% assign current_product = product %}
+      {% for product in collections.all.products limit: 4 %}
+        {% unless product.id == current_product.id %}
+          <a href="{{ product.url }}" class="also-like-card" style="text-decoration:none; color:inherit;">
+            <div class="also-like-img-wrap">
+              {% if product.featured_image %}
+                <img src="{{ product.featured_image | image_url: width: 600 }}" alt="{{ product.title }}">
+              {% endif %}
+            </div>
+            <div class="also-like-info">
+              <h4>{{ product.title }}</h4>
+              <p>{% for collection in product.collections limit:1 %}{{ collection.title }}{% endfor %}</p>
+              <div class="price">{{ product.price | money }}</div>
+            </div>
+          </a>
+        {% endunless %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<script>
+  // Variant selection
+  const productData = {{ product | json }};
+  const select = document.getElementById('ProductSelect');
+  const addBtn = document.getElementById('ppAddBtn');
+  const selectedOptions = {};
+
+  document.querySelectorAll('.size-option').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const position = btn.dataset.optionPosition;
+      const value = btn.dataset.value;
+      
+      // Update active state
+      document.querySelectorAll(`.size-option[data-option-position="${position}"]`).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      selectedOptions[position] = value;
+      
+      // Find matching variant
+      const matchingVariant = productData.variants.find(v => {
+        return v.options.every((opt, idx) => {
+          return !selectedOptions[idx + 1] || selectedOptions[idx + 1] === opt;
+        });
+      });
+      
+      if (matchingVariant) {
+        select.value = matchingVariant.id;
+        if (addBtn) {
+          addBtn.disabled = !matchingVariant.available;
+          addBtn.textContent = `Add to Bag — ${Shopify.formatMoney(matchingVariant.price, "{{ shop.currency }}")}`;
+        }
+      }
+    });
+  });
+
+  // Quantity
+  let qty = 1;
+  const qtyValue = document.getElementById('ppQtyValue');
+  const qtyInput = document.getElementById('ProductQuantity');
+  
+  document.getElementById('ppQtyMinus').addEventListener('click', () => {
+    if (qty > 1) { qty--; qtyValue.textContent = qty; qtyInput.value = qty; }
+  });
+  document.getElementById('ppQtyPlus').addEventListener('click', () => {
+    qty++; qtyValue.textContent = qty; qtyInput.value = qty;
+  });
+
+  // Image zoom
+  const gallery = document.getElementById('productGallery');
+  const galleryImg = document.getElementById('galleryImg');
+  const lens = document.getElementById('magnifierLens');
+  
+  if (galleryImg) {
+    lens.style.backgroundImage = `url(${galleryImg.src})`;
+    
+    gallery.addEventListener('mousemove', (e) => {
+      if (gallery.classList.contains('zoomed')) return;
+      const rect = gallery.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const lensSize = 180;
+      lens.style.left = (x - lensSize/2) + 'px';
+      lens.style.top = (y - lensSize/2) + 'px';
+      
+      const imgRect = galleryImg.getBoundingClientRect();
+      const zoomLevel = 2.5;
+      const bgWidth = imgRect.width * zoomLevel;
+      const bgHeight = imgRect.height * zoomLevel;
+      const percentX = (x - (rect.width - imgRect.width)/2) / imgRect.width;
+      const percentY = (y - (rect.height - imgRect.height)/2) / imgRect.height;
+      lens.style.backgroundSize = `${bgWidth}px ${bgHeight}px`;
+      lens.style.backgroundPosition = `${-(percentX * bgWidth - lensSize/2)}px ${-(percentY * bgHeight - lensSize/2)}px`;
+    });
+
+    gallery.addEventListener('click', (e) => {
+      if (e.target.closest('.magnifier-lens')) return;
+      gallery.classList.toggle('zoomed');
+      if (gallery.classList.contains('zoomed')) {
+        const rect = gallery.getBoundingClientRect();
+        galleryImg.style.transformOrigin = `${((e.clientX - rect.left)/rect.width)*100}% ${((e.clientY - rect.top)/rect.height)*100}%`;
+      } else {
+        galleryImg.style.transformOrigin = 'center center';
+      }
+    });
+  }
+
+  // AJAX Add to Cart
+  const productForm = document.querySelector('form[action*="/cart/add"]');
+  if (productForm) {
+    productForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(productForm);
+      
+      try {
+        const response = await fetch('/cart/add.js', {
+          method: 'POST',
+          body: formData
+        });
+        
+        if (response.ok) {
+          if (addBtn) {
+            addBtn.textContent = 'Added ✓';
+            addBtn.style.background = '#2d5016';
+          }
+          
+          const toast = document.getElementById('toast');
+          toast.textContent = 'Added to bag';
+          toast.classList.add('show');
+          setTimeout(() => toast.classList.remove('show'), 2000);
+          
+          // Update cart count
+          const cartCountEl = document.querySelector('.cart-count');
+          if (cartCountEl) {
+            const currentCount = parseInt(cartCountEl.textContent) || 0;
+            cartCountEl.textContent = currentCount + qty;
+            cartCountEl.style.display = 'flex';
+          }
+          
+          setTimeout(() => {
+            if (addBtn) {
+              addBtn.textContent = `Add to Bag — {{ product.price | money }}`;
+              addBtn.style.background = '';
+            }
+          }, 1500);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    });
+  }
+</script>
+
+{% schema %}
+{
+  "name": "Product Page",
+  "tag": "section",
+  "settings": []
+}
+{% endschema %}
