@@ -1,0 +1,157 @@
+<div class="contact-hero">
+  <div class="contact-hero-content">
+    <div class="contact-hero-breadcrumb">
+      <a href="{{ routes.root_url }}">Home</a> / Contact Us
+    </div>
+    <h1 class="contact-hero-title">Get In Touch</h1>
+    <p class="contact-hero-desc">We'd love to hear from you. Whether you have a question about our fragrances, need assistance with an order, or want to collaborate — our team is here to help.</p>
+  </div>
+</div>
+
+<div class="contact-content">
+  <div class="contact-grid">
+    <div class="contact-info">
+      <h2>Let's Start a Conversation</h2>
+      <p>At {{ shop.name }}, every interaction matters. Our dedicated team is committed to providing you with the exceptional service you deserve.</p>
+      
+      <div class="contact-details">
+        <div class="contact-detail">
+          <div class="contact-detail-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+          </div>
+          <div class="contact-detail-text">
+            <h4>Email Us</h4>
+            <p><a href="mailto:{{ shop.email }}">{{ shop.email }}</a></p>
+          </div>
+        </div>
+        
+        {% if section.settings.phone != blank %}
+        <div class="contact-detail">
+          <div class="contact-detail-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+          </div>
+          <div class="contact-detail-text">
+            <h4>Call Us</h4>
+            <p><a href="tel:{{ section.settings.phone }}">{{ section.settings.phone }}</a></p>
+            <p>{{ section.settings.hours }}</p>
+          </div>
+        </div>
+        {% endif %}
+        
+        {% if section.settings.address != blank %}
+        <div class="contact-detail">
+          <div class="contact-detail-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+          </div>
+          <div class="contact-detail-text">
+            <h4>Visit Our Boutique</h4>
+            <p>{{ section.settings.address }}</p>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="contact-form-wrap">
+      <h3>Send Us a Message</h3>
+      <p>Fill out the form below and we'll get back to you within 24 hours.</p>
+      
+      {% form 'contact' %}
+        {% if form.posted_successfully? %}
+          <div class="contact-form-success show">
+            <h4>Message Sent Successfully!</h4>
+            <p>Thank you for reaching out. Our team will review your message and get back to you within 24 hours.</p>
+          </div>
+        {% endif %}
+        
+        {% if form.errors %}
+          <div class="contact-form-success show" style="border-left-color:#c00;">
+            <h4>Please fix the following errors:</h4>
+            {{ form.errors | default_errors }}
+          </div>
+        {% endif %}
+        
+        <div class="contact-form">
+          <div class="contact-form-row">
+            <div class="contact-form-group">
+              <label>First Name <span class="required">*</span></label>
+              <input type="text" name="contact[first_name]" required placeholder="Your first name">
+            </div>
+            <div class="contact-form-group">
+              <label>Last Name <span class="required">*</span></label>
+              <input type="text" name="contact[last_name]" required placeholder="Your last name">
+            </div>
+          </div>
+          <div class="contact-form-row">
+            <div class="contact-form-group">
+              <label>Email <span class="required">*</span></label>
+              <input type="email" name="contact[email]" required placeholder="your@email.com">
+            </div>
+            <div class="contact-form-group">
+              <label>Phone</label>
+              <input type="tel" name="contact[phone]" placeholder="+92 300 1234567">
+            </div>
+          </div>
+          <div class="contact-form-group">
+            <label>Subject <span class="required">*</span></label>
+            <select name="contact[subject]" required>
+              <option value="">Select a subject</option>
+              <option>General Inquiry</option>
+              <option>Order Support</option>
+              <option>Product Information</option>
+              <option>Returns & Exchanges</option>
+              <option>Wholesale Inquiry</option>
+              <option>Press & Media</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="contact-form-group">
+            <label>Message <span class="required">*</span></label>
+            <textarea name="contact[body]" required placeholder="Tell us how we can help you..."></textarea>
+          </div>
+          <button type="submit" class="contact-submit">
+            Send Message
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </button>
+        </div>
+      {% endform %}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Contact Page",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "phone",
+      "label": "Phone Number",
+      "default": "+92 300 1234567"
+    },
+    {
+      "type": "text",
+      "id": "hours",
+      "label": "Business Hours",
+      "default": "Mon - Sat, 10 AM - 7 PM (PKT)"
+    },
+    {
+      "type": "textarea",
+      "id": "address",
+      "label": "Address",
+      "default": "Plot 45, Block H, Phase 5, DHA, Lahore, Pakistan"
+    }
+  ]
+}
+{% endschema %}
