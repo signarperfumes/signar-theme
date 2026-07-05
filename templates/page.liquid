@@ -1,0 +1,17 @@
+<div class="policy-hero">
+  <div class="policy-breadcrumb">
+    <a href="{{ routes.root_url }}">Home</a> / {{ page.title }}
+  </div>
+  <h1 class="policy-title">{{ page.title }}</h1>
+</div>
+<div class="policy-content">
+  {{ page.content }}
+</div>
+
+{% schema %}
+{
+  "name": "Default Page",
+  "tag": "section",
+  "settings": []
+}
+{% endschema %}
