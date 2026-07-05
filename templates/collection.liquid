@@ -1,0 +1,120 @@
+<div class="collection-hero">
+  {% if collection.image %}
+    <div class="collection-hero-bg" style="background-image: url('{{ collection.image | image_url: width: 1920 }}');"></div>
+  {% endif %}
+  <div class="collection-hero-overlay"></div>
+  <div class="collection-hero-content">
+    <div class="collection-hero-breadcrumb">
+      <a href="{{ routes.root_url }}">Home</a> / {{ collection.title }}
+    </div>
+    <h1 class="collection-hero-title">{{ collection.title }}</h1>
+    {% if collection.description != blank %}
+      <p class="collection-hero-desc">{{ collection.description }}</p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="collection-products-section">
+  <div class="collection-products-header">
+    <div>
+      <h2>{{ collection.title }}</h2>
+      <p class="collection-count">{{ collection.products_count }} Fragrance{{ collection.products_count | pluralize: 's' }}</p>
+    </div>
+    <select class="collection-sort" id="collectionSort" onchange="window.location.href=this.value">
+      <option value="{{ collection.url }}?sort_by=manual">Sort: Featured</option>
+      <option value="{{ collection.url }}?sort_by=price-ascending">Price: Low to High</option>
+      <option value="{{ collection.url }}?sort_by=price-descending">Price: High to Low</option>
+      <option value="{{ collection.url }}?sort_by=title-ascending">Name: A to Z</option>
+      <option value="{{ collection.url }}?sort_by=created-descending">Newest</option>
+      <option value="{{ collection.url }}?sort_by=best-selling">Best Selling</option>
+    </select>
+  </div>
+  <div class="products-grid">
+    {% for product in collection.products %}
+      <div class="product-card reveal">
+        <a href="{{ product.url }}" style="text-decoration:none; color:inherit;">
+          <div class="product-image-wrapper">
+            {% if product.featured_image %}
+              <img src="{{ product.featured_image | image_url: width: 800 }}" alt="{{ product.title }}" class="product-image" loading="lazy">
+            {% endif %}
+            {% if product.available == false %}
+              <span class="product-badge">Sold Out</span>
+            {% elsif product.compare_at_price > product.price %}
+              <span class="product-badge">Sale</span>
+            {% endif %}
+          </div>
+          <div class="product-info">
+            <h3 class="product-name">{{ product.title }}</h3>
+            <p class="product-category">{{ collection.title }}</p>
+            <p class="product-price">{{ product.price | money }}</p>
+          </div>
+        </a>
+        {% if product.available %}
+          <button class="product-cta" data-add-id="{{ product.variants.first.id }}">Add to Bag</button>
+        {% else %}
+          <button class="product-cta" disabled style="opacity:0.5; cursor:not-allowed;">Sold Out</button>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+  
+  {% if collection.products.size == 0 %}
+    <p style="text-align:center; padding:4rem 0; color:#666;">No products found in this collection.</p>
+  {% endif %}
+
+  {% if paginate.pages > 1 %}
+    <div style="text-align:center; margin-top:3rem;">
+      {{ paginate | default_pagination }}
+    </div>
+  {% endif %}
+</div>
+
+<script>
+  document.querySelectorAll('[data-add-id]').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const variantId = parseInt(btn.dataset.addId);
+      
+      try {
+        const response = await fetch('/cart/add.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: variantId, quantity: 1 })
+        });
+        
+        if (response.ok) {
+          btn.textContent = 'Added ✓';
+          btn.classList.add('added');
+          
+          const toast = document.getElementById('toast');
+          toast.textContent = 'Added to bag';
+          toast.classList.add('show');
+          setTimeout(() => toast.classList.remove('show'), 2000);
+          
+          const cartCountEl = document.querySelector('.cart-count');
+          if (cartCountEl) {
+            const currentCount = parseInt(cartCountEl.textContent) || 0;
+            cartCountEl.textContent = currentCount + 1;
+            cartCountEl.style.display = 'flex';
+          }
+          
+          setTimeout(() => {
+            btn.textContent = 'Add to Bag';
+            btn.classList.remove('added');
+          }, 1500);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Collection Page",
+  "tag": "section",
+  "settings": []
+}
+{% endschema %}
